@@ -11,7 +11,6 @@ const http = require('https');
 app.use(express.json());
 app.use(cors());
 const nodemailer = require('nodemailer');
-const { emit } = require('process');
 
 app.use(cors());
 app.use(express.json({ limit: "25mb" }));
@@ -69,7 +68,7 @@ function sendEmail({ recipient_email, subject, name, message, phone_number}){
 }
 
 app.get('/*', function(req, res) {
-    res.sendFile(path.join(__dirname, 'green/public/index.html'), function(err) {
+    res.sendFile(path.join(__dirname, '././index.html'), function(err) {
       if (err) {
         res.status(500).send(err)
       }
