@@ -67,13 +67,7 @@ function sendEmail({ recipient_email, subject, name, message, phone_number}){
     })
 }
 
-app.get('/*', function(req, res) {
-    res.sendFile(path.join(__dirname, 'mecls/green/public/index.html'), function(err) {
-      if (err) {
-        res.status(500).send(err)
-      }
-    })
-  })
+
 
 // get method to get the message from the form dont think its needed 
 app.get('/', (req,res) =>{  
