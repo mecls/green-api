@@ -120,7 +120,7 @@ async function sendMail({recipient_email, subject, name, message, phone_number})
 
 
 // get method to get the message from the form 
-app.get('/contactus', async (req,res) =>{  
+app.get('/', async (req,res) =>{  
     sendMail()
     .then(response => res.send(response.message))
 })
