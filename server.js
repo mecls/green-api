@@ -69,15 +69,15 @@ function sendEmail({recipient_email, subject, name, message, phone_number}){
 
 
 
-// get method to get the message from the form dont think its needed 
-app.get('/', (req,res) =>{  
+// get method to get the message from the form 
+app.get('/contactus', async (req,res) =>{  
     sendEmail()
     .then(response => res.send(response.message))
 })
 
 
 // post method that sends the email
-app.post("/send_email", (req,res)=>{
+app.post("/send_email", async (req,res)=>{
     sendEmail(req.body)
     .then(response => res.send(response.messages))
     .catch(error => res.status(500).send(error.message))
