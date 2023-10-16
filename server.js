@@ -34,7 +34,7 @@ app.use((req,res, next)=>{
 
 
 //Contact Us Form to receive emails from clients directly from the website
-async function sendMail({recipient_email, subject, name, message, phone_number}){
+ function sendMail({recipient_email, subject, name, message, phone_number}){
 
     const output = `
     <p>You have a new contact request</p>
@@ -48,8 +48,9 @@ async function sendMail({recipient_email, subject, name, message, phone_number})
     <h3>Message</h3>
     <p>${message}</p>
     `;
-    try{
-        const accessToken = await oAuth2Client.getAccessToken()
+    return new Promise((resolve ,reject) =>{
+         
+        const accessToken = oAuth2Client.getAccessToken()
 
         const transporter = nodemailer.createTransport({
                     service:'gmail',
@@ -74,11 +75,7 @@ async function sendMail({recipient_email, subject, name, message, phone_number})
             html: output
               };
 
-             const result = await transporter.sendMail(mailOptions)
-             return result
-     }catch (error){
-        return error
-    }
+     
         
         
         // return new Promise((resolve ,reject) =>{
@@ -105,14 +102,14 @@ async function sendMail({recipient_email, subject, name, message, phone_number})
         //         html: output
                
         //       };
-        //     transporter.sendMail(messages, function(error, info){
-        //         if(error){
-        //             console.log(error)
-        //             return reject({message: "An error has occured"})
-        //         }
-        //         return resolve({message: "Email sent successfuly"})
-        //     })
-        // })
+            transporter.sendMail(mailOptions, function(error, info){
+                if(error){
+                    console.log(error)
+                    return reject({message: "An error has occured"})
+                }
+                return resolve({message: "Email sent successfuly"})
+            })
+        })
    
     
 }
@@ -120,14 +117,14 @@ async function sendMail({recipient_email, subject, name, message, phone_number})
 
 
 // get method to get the message from the form 
-app.get('/', async (req,res) =>{  
+app.get('/',  (req,res) =>{  
     sendMail()
     .then(response => res.send(response.message))
 })
 
 
 // post method that sends the email
-app.post("/send_email", async (req,res)=>{
+app.post("/send_email",  (req,res)=>{
     sendMail(req.body)
     .then(response => res.send(response.messages))
     .catch(error => res.status(500).send(error.message))
