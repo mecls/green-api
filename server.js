@@ -3,6 +3,16 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const app = express();
 const http = require('https');
+const {google} = require('googleapis');
+
+const CLIENT_ID = '686654606509-tjn5u20p3uds82kp16c2qf94uadubmq8.apps.googleusercontent.com';
+const CLIENT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = '1//046u90lyGqqz-CgYIARAAGAQSNwF-L9Irwo18_DlyupSjkc9qHqURuD_bmmOub2pXkR_eMJ5GcjZ4FOnd8VbpqNptJ9obBnxLZUo';
+
+const oAuth2Client = new google.auth.OAuth2(CLIENT_ID,CLIENT_SECRET, REDIRECT_URI)
+oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN})
+
 
 // const axios = require('axios');
 //  const apiUrl = 'https://api.beehiiv.com/v2/publications/pub_375a4bc6-a5e4-4053-ad0c-833a7a848aed/subscriptions';
@@ -24,7 +34,7 @@ app.use((req,res, next)=>{
 
 
 //Contact Us Form to receive emails from clients directly from the website
-function sendEmail({recipient_email, subject, name, message, phone_number}){
+async function sendMail({recipient_email, subject, name, message, phone_number}){
 
     const output = `
     <p>You have a new contact request</p>
@@ -38,47 +48,87 @@ function sendEmail({recipient_email, subject, name, message, phone_number}){
     <h3>Message</h3>
     <p>${message}</p>
     `;
-    return new Promise((resolve ,reject) =>{
-        let transporter = nodemailer.createTransport({
-            service:'gmail',
-            auth:{
-                user:myemail,
-                pass:mypass
-            },
-            tls:{
-                rejectUnauthorized:false
-            }
-        })
-        var messages = {
-            from: "green.ajuda@gmail.com",
-            to: "green.ajuda@gmail.com",
+    try{
+        const accessToken = await oAuth2Client.getAccessToken()
+
+        const transporter = nodemailer.createTransport({
+                    service:'gmail',
+                    auth:{
+                        type:'oauth2',
+                        user:myemail,
+                       clientId:CLIENT_ID,
+                       clientSecret:CLIENT_SECRET,
+                       refreshToken:REFRESH_TOKEN,
+                       accessToken: accessToken
+                    },
+                    tls:{
+                        rejectUnauthorized:false
+                    }
+                })
+
+         const mailOptions ={
+            from: 'CONTACT US FORM <green.ajuda@gmail.com>',
+            to: 'green.ajuda@gmail.com',
             subject: subject,
             text: message,
             html: output
-           
-          };
-        transporter.sendMail(messages, function(error, info){
-            if(error){
-                console.log(error)
-                return reject({message: "An error has occured"})
-            }
-            return resolve({message: "Email sent successfuly"})
-        })
-    })
+              };
+
+             const result = await transporter.sendMail(mailOptions)
+             return result
+     }catch (error){
+        return error
+    }
+        
+        
+        // return new Promise((resolve ,reject) =>{
+        //    
+        // const transporter = nodemailer.createTransport({
+        //     service:'gmail',
+        //     auth:{
+        //         type:'oauth2',
+        //         user:myemail,
+        //        clientId:CLIENT_ID,
+        //        clientSecret:CLIENT_SECRET,
+        //        refreshToken:REFRESH_TOKEN,
+        //        accessToken: accessToken
+        //     },
+        //     tls:{
+        //         rejectUnauthorized:false
+        //     }
+        // })
+        //     var messages = {
+        //         from: "green.ajuda@gmail.com",
+        //         to: "green.ajuda@gmail.com",
+        //         subject: subject,
+        //         text: message,
+        //         html: output
+               
+        //       };
+        //     transporter.sendMail(messages, function(error, info){
+        //         if(error){
+        //             console.log(error)
+        //             return reject({message: "An error has occured"})
+        //         }
+        //         return resolve({message: "Email sent successfuly"})
+        //     })
+        // })
+   
+    
 }
 
 
 
 // get method to get the message from the form 
 app.get('/contactus', async (req,res) =>{  
-    sendEmail()
+    sendMail()
     .then(response => res.send(response.message))
 })
 
 
 // post method that sends the email
 app.post("/send_email", async (req,res)=>{
-    sendEmail(req.body)
+    sendMail(req.body)
     .then(response => res.send(response.messages))
     .catch(error => res.status(500).send(error.message))
 })
@@ -100,4 +150,3 @@ app.listen(3001,()=>{
 
 
 const myemail = "green.ajuda@gmail.com"
-const mypass = "uahmtfcarfdsfjzc"
