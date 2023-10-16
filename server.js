@@ -24,7 +24,7 @@ app.use((req,res, next)=>{
 
 
 //Contact Us Form to receive emails from clients directly from the website
-function sendEmail({ recipient_email, subject, name, message, phone_number}){
+function sendEmail({recipient_email, subject, name, message, phone_number}){
 
     const output = `
     <p>You have a new contact request</p>
@@ -50,7 +50,7 @@ function sendEmail({ recipient_email, subject, name, message, phone_number}){
             }
         })
         var messages = {
-            from: recipient_email,
+            from: "green.ajuda@gmail.com",
             to: "green.ajuda@gmail.com",
             subject: subject,
             text: message,
